@@ -1,0 +1,10 @@
+[{
+    "age": 4,
+    "money": 40,
+    "time": 344,
+    "purchases": [
+        "card",
+        "pizza",
+        "burger"
+    ]
+}]
