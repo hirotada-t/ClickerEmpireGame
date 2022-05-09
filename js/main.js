@@ -140,22 +140,36 @@ class View {
 
   static createItemPage(user) {
     const container = document.createElement("div");
-    container.innerHTML = `
-    <div class="text-white d-sm-flex align-items-center m-1 selectItem">
-      <div class="d-none d-sm-block p-1 col-sm-3">
-        <img src="https://cdn.pixabay.com/photo/2019/06/30/20/09/grill-4308709_960_720.png" class="img-fluid">
-      </div>
-      <div class="col-sm-9">
-        <div class="d-flex justify-content-between">
-          <h4>Flip machine</h4>
-          <h4>0</h4>
-        </div>
-        <div class="d-flex justify-content-between">
-          <p>￥15000</p>
-          <p class="text-success">￥25 /click</p>
-        </div>
-      </div>                      
-    </div>`;
+    for (let i = 0; i < user.items.length; i++) {
+      let increaseRate;
+      if (user.items[i].type == "ability") increaseRate = user.items[i].perMoney + " /click";
+      else if (user.items[i].type == "investment") increaseRate = user.items[i].perRate + "% /day";
+      else increaseRate = user.items[i].perMoney + " /day";
+      container.innerHTML += `
+        <div class="text-white d-sm-flex align-items-center m-1 selectItem">
+          <div class="d-none d-sm-block p-1 col-sm-3">
+            <img src="${user.items[i].url}" class="img-fluid">
+          </div>
+          <div class="col-sm-9">
+            <div class="d-flex justify-content-between">
+              <h4>${user.items[i].name}</h4>
+              <h4>${user.items[i].currentAmount}</h4>
+            </div>
+            <div class="d-flex justify-content-between">
+              <p>￥${user.items[i].price}</p>
+              <p class="text-success">￥${increaseRate}</p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    let select = container.querySelectorAll(".selectItem");
+    for (let i = 0; i < select.length; i++) {
+      select[i].addEventListener("click", () => {
+        console.log(user.items[i].name)
+        // アイテム情報・戻る・購入ボタン
+      });
+    }
     return container;
   }
 };
