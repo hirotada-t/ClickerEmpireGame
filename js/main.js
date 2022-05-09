@@ -112,11 +112,15 @@ class View {
     });
   }
 
-  static createBurgerStatus(user) { }
+  static createBurgerStatus(user) {
+    const container = document.createElement("div");
+    container.innerHTML = ``
+    return container;
+  }
 
   static createUserInfo(user) {
     const container = document.createElement("div");
-    container.classList.add("d-flex","flex-wrap","p-1")
+    container.classList.add("d-flex", "flex-wrap", "p-1")
     container.innerHTML = `
       <div class="text-white text-center col-12 col-sm-6 userInfoBorder">
         <p>${user.name}</p>
@@ -134,7 +138,26 @@ class View {
     return container;
   }
 
-  static createItemPage(user) { }
+  static createItemPage(user) {
+    const container = document.createElement("div");
+    container.innerHTML = `
+    <div class="text-white d-sm-flex align-items-center m-1 selectItem">
+      <div class="d-none d-sm-block p-1 col-sm-3">
+        <img src="https://cdn.pixabay.com/photo/2019/06/30/20/09/grill-4308709_960_720.png" class="img-fluid">
+      </div>
+      <div class="col-sm-9">
+        <div class="d-flex justify-content-between">
+          <h4>Flip machine</h4>
+          <h4>0</h4>
+        </div>
+        <div class="d-flex justify-content-between">
+          <p>￥15000</p>
+          <p class="text-success">￥25 /click</p>
+        </div>
+      </div>                      
+    </div>`;
+    return container;
+  }
 };
 // 入力→操作
 class Controller {
@@ -149,7 +172,7 @@ class Controller {
     newGameBtn.addEventListener("click", () => {
       const userName = config.initialPage.querySelector("input").value;
       if (userName == "") alert("新しい名前を入力してください。");
-      else if (Controller.getUserData(userName) != null) alert("ユーザーがすでに存在しています。ログインしてください。");
+      else if (localStorage.getItem(userName) != null) alert("ユーザーがすでに存在しています。ログインしてください。");
       else {
         // Userオブジェクトを生成してMainへ遷移
         const user = Controller.createInitialUserAccount(userName);
@@ -160,8 +183,9 @@ class Controller {
     loginBtn.addEventListener("click", () => {
       const userName = config.initialPage.querySelector("input").value;
       if (userName == "") alert("名前を入力してください。");
-      else if (Controller.getUserData(userName) == null) alert("ユーザーが存在しません。別の名前を入力してください。");
+      else if (localStorage.getItem(userName) == null) alert("ユーザーが存在しません。別の名前を入力してください。");
       else {
+        const user = Controller.callUserAccount(userName);
         Controller.moveInitialToMain(user);
       };
     });
@@ -183,31 +207,36 @@ class Controller {
 
   static startTimer(user) {
     Controller.setTimerID = setInterval(() => {
-      user.days+=15;
-      if(user.days % 360 == 0) user.age++;
-      user.money += user.days * user.incomePerSec ;
+      user.days += 15;
+      if (user.days % 360 == 0) user.age++;
+      user.money += user.days * user.incomePerSec;
       Controller.updateUserAccount(user);
     }, 1000)
   }
-  static stopTimer(){
+  static stopTimer() {
     clearInterval(Controller.setTimerID);
   }
 
   static createInitialUserAccount(userName) {
     let itemsList = [
-      new Items("Flip machine", "ability", 0, 500, 25, 0, 15000, "https://cdn.pixabay.com/photo/2019/06/30/20/09/grill-4308709_960_720.png"),
-      new Items("ETF Stock", "investment", 0, -1, 0, 0.1, 300000, "https://cdn.pixabay.com/photo/2016/03/31/20/51/chart-1296049_960_720.png"),
-      new Items("ETF Bonds", "investment", 0, -1, 0, 0.07, 300000, "https://cdn.pixabay.com/photo/2016/03/31/20/51/chart-1296049_960_720.png"),
-      new Items("Lemonade Stand", "realState", 0, 1000, 30, 0, 30000, "https://cdn.pixabay.com/photo/2012/04/15/20/36/juice-35236_960_720.png"),
-      new Items("Ice Cream Truck", "realState", 0, 500, 120, 0, 100000, "https://cdn.pixabay.com/photo/2020/01/30/12/37/ice-cream-4805333_960_720.png"),
-      new Items("House", "realState", 0, 100, 32000, 0, 20000000, "https://cdn.pixabay.com/photo/2016/03/31/18/42/home-1294564_960_720.png"),
-      new Items("TownHouse", "realState", 0, 100, 64000, 0, 40000000, "https://cdn.pixabay.com/photo/2019/06/15/22/30/modern-house-4276598_960_720.png"),
-      new Items("Mansion", "realState", 0, 20, 500000, 0, 250000000, "https://cdn.pixabay.com/photo/2017/10/30/20/52/condominium-2903520_960_720.png"),
-      new Items("Industrial Space", "realState", 0, 10, 2200000, 0, 1000000000, "https://cdn.pixabay.com/photo/2012/05/07/17/35/factory-48781_960_720.png"),
-      new Items("Hotel Skyscraper", "realState", 0, 5, 25000000, 0, 10000000000, "https://cdn.pixabay.com/photo/2012/05/07/18/03/skyscrapers-48853_960_720.png"),
-      new Items("Bullet-Speed Sky Railway", "realState", 0, 1, 30000000000, 0, 10000000000000, "https://cdn.pixabay.com/photo/2013/07/13/10/21/train-157027_960_720.png")
+      new Items("Flip machine", "ability", 0, 500, 25, 0, 15000, "../img/grill-4308709_960_720.png"),
+      new Items("ETF Stock", "investment", 0, -1, 0, 0.1, 300000, "../img/chart-1296049_960_720.png"),
+      new Items("ETF Bonds", "investment", 0, -1, 0, 0.07, 300000, "../img/chart-1296049_960_720.png"),
+      new Items("Lemonade Stand", "realState", 0, 1000, 30, 0, 30000, "../img/juice-35236_960_720.png"),
+      new Items("Ice Cream Truck", "realState", 0, 500, 120, 0, 100000, "../img/ice-cream-4805333_960_720.png"),
+      new Items("House", "realState", 0, 100, 32000, 0, 20000000, "../img/home-1294564_960_720.png"),
+      new Items("TownHouse", "realState", 0, 100, 64000, 0, 40000000, "../img/modern-house-4276598_960_720.png"),
+      new Items("Mansion", "realState", 0, 20, 500000, 0, 250000000, "../img/condominium-2903520_960_720.png"),
+      new Items("Industrial Space", "realState", 0, 10, 2200000, 0, 1000000000, "../img/factory-48781_960_720.png"),
+      new Items("Hotel Skyscraper", "realState", 0, 5, 25000000, 0, 10000000000, "../img/skyscrapers-48853_960_720.png"),
+      new Items("Bullet-Speed Sky Railway", "realState", 0, 1, 30000000000, 0, 10000000000000, "../img/train-157027_960_720.png")
     ]
     return new User(userName, 20, 0, 50000, itemsList);
+  }
+
+  static callUserAccount(userName) {
+    const str = localStorage.getItem(userName);
+    return JSON.parse(str);
   }
 
   static updateUserAccount(user) {
@@ -235,8 +264,8 @@ class Controller {
   }
 
   static getUserData(userName) {
-
   }
+
 };
 
 Controller.startGame();
