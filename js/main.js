@@ -114,8 +114,30 @@ class View {
 
   static createBurgerStatus(user) {
     const container = document.createElement("div");
-    container.innerHTML = ``
+    container.innerHTML = `
+      <div class="bg-navy text-white text-center">
+        <h5>${user.clickCount} Burgers</h5>
+        <p>one click ￥${user.incomePerClick} </p>
+      </div>
+      <div class="p-2 pt-5 d-flex justify-content-center">
+        <img src="../img/burger-307648_960_720.png" width="80%" class="py-2 hover img-fuid" id="burger">
+      </div>
+    `
+    container.querySelector("#burger").addEventListener("click", () => {
+      Controller.updateBurgerClick(user);
+
+      View.updateBurgerStatus(user);
+
+      View.createBurgerStatus(user);
+      View.updateUserInfo(user);
+    });
     return container;
+  }
+
+  static updateBurgerStatus(user) {
+    const burgerStatus = document.getElementById("burgerStatus");
+    burgerStatus.querySelector("h5").innerHTML = `${user.clickCount} Burgers`;
+    burgerStatus.querySelector("p").innerHTML = `one click ￥${user.incomePerClick}`;
   }
 
   static createUserInfo(user) {
@@ -138,13 +160,18 @@ class View {
     return container;
   }
 
+  static updateUserInfo(user) {
+    const userInfo = document.getElementById("userInfo");
+    userInfo.innerHTML = "";
+    userInfo.append(View.createUserInfo(user));
+  }
+
   static createItemPage(user) {
     const container = document.createElement("div");
     for (let i = 0; i < user.items.length; i++) {
-      let increaseRate;
-      if (user.items[i].type == "ability") increaseRate = user.items[i].perMoney + " /click";
-      else if (user.items[i].type == "investment") increaseRate = user.items[i].perRate + "% /day";
-      else increaseRate = user.items[i].perMoney + " /day";
+
+      let increaseRate = Controller.discriminateType(user.items[i]);
+
       container.innerHTML += `
         <div class="text-white d-sm-flex align-items-center m-1 selectItem">
           <div class="d-none d-sm-block p-1 col-sm-3">
@@ -166,13 +193,47 @@ class View {
     let select = container.querySelectorAll(".selectItem");
     for (let i = 0; i < select.length; i++) {
       select[i].addEventListener("click", () => {
-        console.log(user.items[i].name)
-        // アイテム情報・戻る・購入ボタン
+        container.innerHTML = "";
+        container.append(View.itemInfoPage(user.items[i]));
       });
     }
     return container;
   }
+
+  static itemInfoPage(item) {
+    let increaseRate = Controller.discriminateType(item);
+    const container = document.createElement("div");
+    container.innerHTML = `
+      <div class="bg-navy p-2 m-1 text-white">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h4>${item.name}</h4>
+            <p>Max purchases: ${item.maxAmount}</p>
+            <p>Price: ￥${item.price}</p>
+            <p>Get ￥${increaseRate}</p>
+          </div>
+          <div class="p-2 d-sm-block col-sm-5">
+            <img src="../img/${item.url}" class="img-fluid">
+          </div>
+        </div>
+        <p>How many would you like to buy?</p>
+        <input type="number" placeholder="0" class="col-12 form-control" min="0" max="${item.maxAmount}">
+        <p class="text-right" id="totalPrice">total: ￥0</p>
+        <div class="d-flex justify-content-between pb-3">
+          <button class="btn btn-outline-primary col-5 bg-light" id="back">Go Back
+          </button><button class="btn btn-primary col-5" id="purchase">Purchase</button>
+        </div>
+      </div>`
+
+    container.querySelector("input").addEventListener("change", (e) => {
+      const target = e.currentTarget;
+      const totalPrice = document.getElementById("totalPrice");
+      totalPrice.innerHTML = "total: ￥"+ item.price * target.value;
+    });
+    return container;
+  }
 };
+
 // 入力→操作
 class Controller {
   setTimerID;
@@ -222,9 +283,9 @@ class Controller {
   static startTimer(user) {
     Controller.setTimerID = setInterval(() => {
       user.days += 15;
+      user.money += user.incomePerSec;
       if (user.days % 360 == 0) user.age++;
-      user.money += user.days * user.incomePerSec;
-      Controller.updateUserAccount(user);
+      View.updateUserInfo(user);
     }, 1000)
   }
   static stopTimer() {
@@ -248,28 +309,25 @@ class Controller {
     return new User(userName, 20, 0, 50000, itemsList);
   }
 
+  static updateBurgerClick(user) {
+    user.clickCount++;
+    user.money += user.incomePerClick;
+  }
+
+  static discriminateType(item) {
+    let type;
+    if (item.type == "ability") type = item.perMoney + " /click";
+    else if (item.type == "investment") type = item.perRate + "% /day";
+    else type = item.perMoney + " /day";
+
+    return type;
+  }
+
   static callUserAccount(userName) {
     const str = localStorage.getItem(userName);
     return JSON.parse(str);
   }
 
-  static updateUserAccount(user) {
-    const userInfo = document.getElementById("userInfo");
-    userInfo.querySelector("div").innerHTML = `
-      <div class="text-white text-center col-12 col-sm-6 userInfoBorder">
-        <p>${user.name}</p>
-      </div>
-      <div class="text-white text-center col-12 col-sm-6 userInfoBorder">
-        <p>${user.age} years old</p>
-      </div>
-      <div class="text-white text-center col-12 col-sm-6 userInfoBorder">
-        <p>${user.days} days</p>
-      </div>
-      <div class="text-white text-center col-12 col-sm-6 userInfoBorder">
-        <p>￥${user.money}</p>
-      </div>
-    `;
-  }
 
   // ローカルストレージに保存
   static saveUserDate(user) {
