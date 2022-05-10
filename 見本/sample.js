@@ -1,13 +1,9 @@
-// 各ページを名前空間に管理
 const config = {
     initialPage: document.getElementById("initialPage"),
     mainPage: document.getElementById("mainPage"),
 }
 
-// ユーザー情報
 class User {
-    // 初期値（name, age, days, money, items）
-    // name;age;days;money;clickCount;incomePerClick;incomePerSec;stock;items
     constructor(name, age, days, money, items) {
         this.name = name;
         this.age = age;
@@ -21,10 +17,7 @@ class User {
     }
 }
 
-// アイテム情報
 class Items {
-    // 初期値（name, type, currentAmount, maxAmount, perMoney, perRate, price, url）
-    // name;type;currentAmount;maxAmount;perMoney;perRate;price;url;
     constructor(name, type, currentAmount, maxAmount, perMoney, perRate, price, url) {
         this.name = name;
         this.type = type;
@@ -37,10 +30,8 @@ class Items {
     }
 }
 
-// レンダリング用
 class View {
-    // ログインページ
-    static createInitialPage() {
+    static createInitalPage() {
         let container = document.createElement("div");
         container.classList.add("vh-100", "d-flex", "justify-content-center", "align-items-center");
         container.innerHTML =
@@ -68,9 +59,7 @@ class View {
         return config.initialPage.append(container);
     }
 
-    // メインページ
     static createMainPage(user) {
-        // 雛形を作成
         let container = document.createElement("div");
         container.innerHTML =
             `
@@ -95,22 +84,19 @@ class View {
                 </div>
             </div>
         </div>
+        <p class="text-white">${user.incomePerSec}</p>
         `
-        // ハンバーガーの状態・ユーザー情報・アイテム情報を各divにアセンブル
         container.querySelectorAll("#burgerStatus")[0].append(View.createBurgerStatus(user));
         container.querySelectorAll("#userInfo")[0].append(View.createUserInfo(user));
         container.querySelectorAll("#displayItems")[0].append(View.createItemPage(user));
 
-        // リセットボタンのクリックイベント→Controllerで実行
         let resetBtn = container.querySelectorAll("#reset")[0];
-        resetBtn.addEventListener("click", function () {
+        resetBtn.addEventListener("click", function() {
             Controller.resetAllData(user);
         });
 
-        // 保存ボタンのクリックイベント→Controllerで実行
         let saveBtn = container.querySelectorAll("#save")[0];
-        saveBtn.addEventListener("click", function () {
-            // ユーザー情報を保存・タイマーを止める・ページ遷移
+        saveBtn.addEventListener("click", function() {
             Controller.saveUserDate(user);
             Controller.stoptimer();
             Controller.initializePage();
@@ -132,7 +118,7 @@ class View {
         </div>    
         `
         let burgerClick = container.querySelectorAll("#burger")[0];
-        burgerClick.addEventListener("click", function () {
+        burgerClick.addEventListener("click", function() {
             Controller.updateByClickBurger(user);
         })
 
@@ -185,7 +171,7 @@ class View {
         }
         let select = container.querySelectorAll(".selectItem");
         for (let i = 0; i < select.length; i++) {
-            select[i].addEventListener("click", function () {
+            select[i].addEventListener("click", function() {
                 config.mainPage.querySelectorAll("#displayItems")[0].innerHTML = '';
                 config.mainPage.querySelectorAll("#displayItems")[0].append(View.createPurchasePage(user, i));
             });
@@ -220,7 +206,7 @@ class View {
             </div>
         `
         let inputCount = container.querySelectorAll("input")[0];
-        inputCount.addEventListener("input", function () {
+        inputCount.addEventListener("input", function() {
             container.querySelectorAll("#totalPrice")[0].innerHTML =
                 `
             total: ￥${Controller.getTotalPrice(user.items[index], inputCount.value)}
@@ -228,12 +214,12 @@ class View {
         });
 
         let backBtn = container.querySelectorAll("#back")[0];
-        backBtn.addEventListener("click", function () {
+        backBtn.addEventListener("click", function() {
             View.updateMainPage(user);
         });
 
         let purchaseBtn = container.querySelectorAll("#purchase")[0];
-        purchaseBtn.addEventListener("click", function () {
+        purchaseBtn.addEventListener("click", function() {
             Controller.purchaseItems(user, index, inputCount.value);
             View.updateMainPage(user);
         })
@@ -270,14 +256,14 @@ class View {
     }
 }
 
-// 入力→操作
+
 class Controller {
     timer;
 
     static startGame() {
-        View.createInitialPage();
+        View.createInitalPage();
         let newGameBtn = config.initialPage.querySelectorAll("#newGame")[0];
-        newGameBtn.addEventListener("click", function () {
+        newGameBtn.addEventListener("click", function() {
             let userName = config.initialPage.querySelectorAll("input")[0].value;
             if (userName == "") {
                 alert("Please put your name");
@@ -288,7 +274,7 @@ class Controller {
         })
 
         let loginBtn = config.initialPage.querySelectorAll("#login")[0];
-        loginBtn.addEventListener("click", function () {
+        loginBtn.addEventListener("click", function() {
             let userName = config.initialPage.querySelectorAll("input")[0].value;
             if (userName == "") {
                 alert("Please put your name");
@@ -325,7 +311,7 @@ class Controller {
     }
 
     static startTimer(user) {
-        Controller.timer = setInterval(function () {
+        Controller.timer = setInterval(function() {
             user.days++;
             user.money += user.incomePerSec;
             if (user.days % 365 == 0) {
