@@ -99,6 +99,17 @@ class View {
     document.getElementById("userInfo").append(View.createUserInfo(user));
     document.getElementById("displayItems").append(View.createItemPage(user));
     // リセットボタンのクリックイベント
+    const resetBtn = document.querySelector("#reset");
+    resetBtn.addEventListener("click", () => {
+      const res = confirm("状態をリセットしますか？");
+      if (res) {
+        config.mainPage.innerHTML = "";
+        const resetUser = Controller.createInitialUserAccount(user.name);
+        Controller.stopTimer(resetUser);
+        View.createMainPage(resetUser);
+        Controller.startTimer(resetUser);
+      }
+    });
 
     // 保存ボタンのクリックイベント
     const saveBtn = document.querySelector("#save");
@@ -228,25 +239,25 @@ class View {
 
     container.querySelector("input").addEventListener("change", (e) => {
       const target = e.currentTarget;
-      Controller.calcTotalPrice(item,target.value);
+      Controller.calcTotalPrice(item, target.value);
     });
 
     container.querySelector("#back").addEventListener("click", () => {
       const displayItems = document.getElementById("displayItems");
-      displayItems.innerHTML ="";
+      displayItems.innerHTML = "";
       displayItems.append(View.createItemPage(user));
     });
 
     container.querySelector("#purchase").addEventListener("click", () => {
       const count = container.querySelector("input").value;
-      if(count == 0) alert("購入する数を入力してください。");
-      else if(max - item.currentAmount < count) alert("これ以上購入できません");
+      if (count == 0) alert("購入する数を入力してください。");
+      else if (max - item.currentAmount < count) alert("これ以上購入できません");
       else {
-        Controller.itemPurchase(user,index,count);
+        Controller.itemPurchase(user, index, count);
         alert("購入が完了しました。");
         View.updateBurgerStatus(user);
         View.updateUserInfo(user);
-        displayItems.innerHTML ="";
+        displayItems.innerHTML = "";
         displayItems.append(View.createItemPage(user));
       }
     });
@@ -335,13 +346,13 @@ class Controller {
     user.money += user.incomePerClick;
   }
 
-  static calcTotalPrice(item,count){
+  static calcTotalPrice(item, count) {
     const totalPrice = document.getElementById("totalPrice");
-    if(item.name == "ETF Stock") {
-      totalPrice.innerHTML = "total: ￥" + Math.round(item.price * 10 * (Math.pow(1.1,count) - 1));
-      item.price = Math.round(item.price * Math.pow(1.1,count));
+    if (item.name == "ETF Stock") {
+      totalPrice.innerHTML = "total: ￥" + Math.round(item.price * 10 * (Math.pow(1.1, count) - 1));
+      item.price = Math.round(item.price * Math.pow(1.1, count));
     } else {
-      totalPrice.innerHTML = "total: ￥" + item.price * target.value;
+      totalPrice.innerHTML = "total: ￥" + item.price * count;
     }
   }
 
@@ -354,15 +365,15 @@ class Controller {
     return type;
   }
 
-  static itemPurchase(user,index,count) {
+  static itemPurchase(user, index, count) {
     count = parseInt(count)
     const item = user.items[index];
     item.currentAmount += count;
     user.money -= item.price * count;
 
-    if(item.type == "ability") user.incomePerClick += count * item.perMoney;
-    else if(item.type == "realState") user.incomePerSec += count * item.perMoney * 15;
-    else if(item.type == "investment") {
+    if (item.type == "ability") user.incomePerClick += count * item.perMoney;
+    else if (item.type == "realState") user.incomePerSec += count * item.perMoney * 15;
+    else if (item.type == "investment") {
       user.stock += item.price * count;
       user.incomePerSec += user.stock * count * item.perRate * 15;
     }
