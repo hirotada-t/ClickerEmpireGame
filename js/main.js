@@ -117,7 +117,7 @@ class View {
     container.innerHTML = `
       <div class="bg-navy text-white text-center">
         <h5>${user.clickCount} Burgers</h5>
-        <p>one click ￥${user.incomePerClick} </p>
+        <p>one click ￥${user.incomePerClick.toLocaleString()} </p>
       </div>
       <div class="p-2 pt-5 d-flex justify-content-center">
         <img src="../img/burger-307648_960_720.png" width="80%" class="py-2 hover img-fuid" id="burger">
@@ -137,7 +137,7 @@ class View {
   static updateBurgerStatus(user) {
     const burgerStatus = document.getElementById("burgerStatus");
     burgerStatus.querySelector("h5").innerHTML = `${user.clickCount} Burgers`;
-    burgerStatus.querySelector("p").innerHTML = `one click ￥${user.incomePerClick}`;
+    burgerStatus.querySelector("p").innerHTML = `one click ￥${user.incomePerClick.toLocaleString()}`;
   }
 
   static createUserInfo(user) {
@@ -154,7 +154,7 @@ class View {
         <p>${user.days} days</p>
       </div>
       <div class="text-white text-center col-12 col-sm-6 userInfoBorder">
-        <p>￥${user.money}</p>
+        <p>￥${user.money.toLocaleString()}</p>
       </div>
     `;
     return container;
@@ -183,7 +183,7 @@ class View {
               <h4>${user.items[i].currentAmount}</h4>
             </div>
             <div class="d-flex justify-content-between">
-              <p>￥${user.items[i].price}</p>
+              <p>￥${user.items[i].price.toLocaleString()}</p>
               <p class="text-success">￥${increaseRate}</p>
             </div>
           </div>
@@ -194,42 +194,63 @@ class View {
     for (let i = 0; i < select.length; i++) {
       select[i].addEventListener("click", () => {
         container.innerHTML = "";
-        container.append(View.itemInfoPage(user.items[i]));
+        container.append(View.itemInfoPage(user, i));
       });
     }
     return container;
   }
 
-  static itemInfoPage(item) {
-    let increaseRate = Controller.discriminateType(item);
+  static itemInfoPage(user, index) {
     const container = document.createElement("div");
+    container.classList.add("bg-navy", "p-2", "m-1", "text-white");
+    const item = user.items[index];
+    const increaseRate = Controller.discriminateType(item);
+    const max = 0 < item.maxAmount ? item.maxAmount : "∞";
     container.innerHTML = `
-      <div class="bg-navy p-2 m-1 text-white">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h4>${item.name}</h4>
-            <p>Max purchases: ${item.maxAmount}</p>
-            <p>Price: ￥${item.price}</p>
-            <p>Get ￥${increaseRate}</p>
-          </div>
-          <div class="p-2 d-sm-block col-sm-5">
-            <img src="../img/${item.url}" class="img-fluid">
-          </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h4>${item.name}</h4>
+          <p>Max purchases: ${max}</p>
+          <p>Price: ￥${item.price.toLocaleString()}</p>
+          <p>Get ￥${increaseRate}</p>
         </div>
-        <p>How many would you like to buy?</p>
-        <input type="number" placeholder="0" class="col-12 form-control" min="0" max="${item.maxAmount}">
-        <p class="text-right" id="totalPrice">total: ￥0</p>
-        <div class="d-flex justify-content-between pb-3">
-          <button class="btn btn-outline-primary col-5 bg-light" id="back">Go Back
-          </button><button class="btn btn-primary col-5" id="purchase">Purchase</button>
+        <div class="p-2 d-sm-block col-sm-5">
+          <img src="../img/${item.url}" class="img-fluid">
         </div>
+      </div>
+      <p>How many would you like to buy?</p>
+      <input type="number" placeholder="0" class="col-12 form-control" min="0" max="${max}" value="0">
+      <p class="text-right" id="totalPrice">total: ￥0</p>
+      <div class="d-flex justify-content-between pb-3">
+        <button class="btn btn-outline-primary col-5 bg-light" id="back">Go Back
+        </button><button class="btn btn-primary col-5" id="purchase">Purchase</button>
       </div>`
 
     container.querySelector("input").addEventListener("change", (e) => {
       const target = e.currentTarget;
-      const totalPrice = document.getElementById("totalPrice");
-      totalPrice.innerHTML = "total: ￥"+ item.price * target.value;
+      Controller.calcTotalPrice(item,target.value);
     });
+
+    container.querySelector("#back").addEventListener("click", () => {
+      const displayItems = document.getElementById("displayItems");
+      displayItems.innerHTML ="";
+      displayItems.append(View.createItemPage(user));
+    });
+
+    container.querySelector("#purchase").addEventListener("click", () => {
+      const count = container.querySelector("input").value;
+      if(count == 0) alert("購入する数を入力してください。");
+      else if(max - item.currentAmount < count) alert("これ以上購入できません");
+      else {
+        Controller.itemPurchase(user,index,count);
+        alert("購入が完了しました。");
+        View.updateBurgerStatus(user);
+        View.updateUserInfo(user);
+        displayItems.innerHTML ="";
+        displayItems.append(View.createItemPage(user));
+      }
+    });
+
     return container;
   }
 };
@@ -295,8 +316,8 @@ class Controller {
   static createInitialUserAccount(userName) {
     let itemsList = [
       new Items("Flip machine", "ability", 0, 500, 25, 0, 15000, "../img/grill-4308709_960_720.png"),
-      new Items("ETF Stock", "investment", 0, -1, 0, 0.1, 300000, "../img/chart-1296049_960_720.png"),
-      new Items("ETF Bonds", "investment", 0, -1, 0, 0.07, 300000, "../img/chart-1296049_960_720.png"),
+      new Items("ETF Stock", "investment", 0, -1, 0, 0.001, 300000, "../img/chart-1296049_960_720.png"),
+      new Items("ETF Bonds", "investment", 0, -1, 0, 0.0007, 300000, "../img/chart-1296049_960_720.png"),
       new Items("Lemonade Stand", "realState", 0, 1000, 30, 0, 30000, "../img/juice-35236_960_720.png"),
       new Items("Ice Cream Truck", "realState", 0, 500, 120, 0, 100000, "../img/ice-cream-4805333_960_720.png"),
       new Items("House", "realState", 0, 100, 32000, 0, 20000000, "../img/home-1294564_960_720.png"),
@@ -306,12 +327,22 @@ class Controller {
       new Items("Hotel Skyscraper", "realState", 0, 5, 25000000, 0, 10000000000, "../img/skyscrapers-48853_960_720.png"),
       new Items("Bullet-Speed Sky Railway", "realState", 0, 1, 30000000000, 0, 10000000000000, "../img/train-157027_960_720.png")
     ]
-    return new User(userName, 20, 0, 50000, itemsList);
+    return new User(userName, 20, 0, 5000000000, itemsList);
   }
 
   static updateBurgerClick(user) {
     user.clickCount++;
     user.money += user.incomePerClick;
+  }
+
+  static calcTotalPrice(item,count){
+    const totalPrice = document.getElementById("totalPrice");
+    if(item.name == "ETF Stock") {
+      totalPrice.innerHTML = "total: ￥" + Math.round(item.price * 10 * (Math.pow(1.1,count) - 1));
+      item.price = Math.round(item.price * Math.pow(1.1,count));
+    } else {
+      totalPrice.innerHTML = "total: ￥" + item.price * target.value;
+    }
   }
 
   static discriminateType(item) {
@@ -321,6 +352,20 @@ class Controller {
     else type = item.perMoney + " /day";
 
     return type;
+  }
+
+  static itemPurchase(user,index,count) {
+    count = parseInt(count)
+    const item = user.items[index];
+    item.currentAmount += count;
+    user.money -= item.price * count;
+
+    if(item.type == "ability") user.incomePerClick += count * item.perMoney;
+    else if(item.type == "realState") user.incomePerSec += count * item.perMoney * 15;
+    else if(item.type == "investment") {
+      user.stock += item.price * count;
+      user.incomePerSec += user.stock * count * item.perRate * 15;
+    }
   }
 
   static callUserAccount(userName) {
