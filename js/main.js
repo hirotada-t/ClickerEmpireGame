@@ -284,7 +284,7 @@ class View {
             <h3 class="col-6 py-3 mb-0">総資産</h3>
           </div>
           <div class="bg-dark mt-2 p-1 overflow-auto h-75" id="rankingLIst">`
-      if(sortedAllUser.length == 0) html += `<div class="text-white text-center h1 rankingItem">No Data</div>`;
+      if(sortedAllUser.length == 0) html += `<div class="text-white text-center h1 pt-5 rankingItem">No Data</div>`;
       else {
         for (let i = 0; i < sortedAllUser.length; i++) {
           html += `
@@ -399,7 +399,7 @@ class Controller {
       new Items("Hotel Skyscraper", "realState", 0, 5, 25000000, 0, 10000000000, "/img/skyscrapers-48853_960_720.png"),
       new Items("Bullet-Speed Sky Railway", "realState", 0, 1, 30000000000, 0, 10000000000000, "/img/train-157027_960_720.png")
     ]
-    return new User(userName, 20, 0, 5000000000, itemsList);
+    return new User(userName, 20, 0, 50000, itemsList);
   }
 
   static updateBurgerClick(user) {
