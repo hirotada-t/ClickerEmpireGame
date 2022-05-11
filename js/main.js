@@ -284,14 +284,17 @@ class View {
             <h3 class="col-6 py-3 mb-0">総資産</h3>
           </div>
           <div class="bg-dark mt-2 p-1 overflow-auto h-75" id="rankingLIst">`
-    for (let i = 0; i < sortedAllUser.length; i++) {
-      html += `
+      if(sortedAllUser.length == 0) html += `<div class="text-white text-center rankingItem">No Data</div>`;
+      else {
+        for (let i = 0; i < sortedAllUser.length; i++) {
+          html += `
             <div class="text-white border-bottom border-light row align-items-center m-1 text-center rankingItem">
               <p class="col-1 py-3 mb-0">${i + 1}</p>
               <h4 class="col-5 py-3 mb-0">${sortedAllUser[i].name}</h4>
               <p class="col-6 py-3 mb-0">${sortedAllUser[i].money}</p>
             </div>`
-    }
+        }
+      }
     html += `
           </div>
           <div class="row justify-content-center py-3">
@@ -470,8 +473,6 @@ class Controller {
   static sortUser(allUser) {
     const sortedAllUser = [...allUser];
     sortedAllUser.sort(function (a, b) { return b.money > a.money ? 1 : -1 });
-    console.log(allUser)
-    console.log(sortedAllUser)
     return sortedAllUser
   }
 
