@@ -1,7 +1,8 @@
 // 各ページを名前空間に管理
 const config = {
   initialPage: document.getElementById("initialPage"),
-  mainPage: document.getElementById("mainPage")
+  mainPage: document.getElementById("mainPage"),
+  rankingPage: document.getElementById("rankingPage")
 };
 
 // ユーザー情報
@@ -53,12 +54,17 @@ class View {
             </div>
           </div>
         </form>
-        <div class="row justify-content-between">
+        <div class="row justify-content-between pb-3">
           <div class="col-6">
             <button type="submit" class="btn btn-primary col-12" id="newGame">New</button>
           </div>
           <div class="col-6">
             <button type="submit" class="btn btn-primary col-12" id="login">Login</button>
+          </div>
+        </div>
+        <div class="row justify-content-between">
+          <div class="col-12">
+            <button type="submit" class="btn btn-danger col-12" id="rankingList">Ranking</button>
           </div>
         </div>
       </div>`;
@@ -264,6 +270,46 @@ class View {
 
     return container;
   }
+
+  static createRankingPage(sortedAllUser) {
+    const container = document.createElement("div");
+    container.classList.add("d-flex", "justify-content-center", "p-md-5", "pb-5");
+    container.style.height = "100vh";
+    let html = `
+      <div class="bg-navy p-2 d-flex col-md-11 col-lg-10">
+        <div class="col-12">
+          <div class="text-white d-flex text-center">
+            <h3 class="col-1 py-3 mb-0"></h3>
+            <h3 class="col-5 py-3 mb-0">UserName</h3>
+            <h3 class="col-6 py-3 mb-0">総資産</h3>
+          </div>
+          <div class="bg-dark mt-2 p-1 overflow-auto h-75" id="rankingLIst">`
+    for (let i = 0; i < sortedAllUser.length; i++) {
+      html += `
+            <div class="text-white border-bottom border-light row align-items-center m-1 text-center rankingItem">
+              <p class="col-1 py-3 mb-0">${i + 1}</p>
+              <h4 class="col-5 py-3 mb-0">${sortedAllUser[i].name}</h4>
+              <p class="col-6 py-3 mb-0">${sortedAllUser[i].money}</p>
+            </div>`
+    }
+    html += `
+          </div>
+          <div class="row justify-content-center py-3">
+            <div class="col-6">
+              <button type="submit" class="btn btn-light col-12" id="back">Go Back</button>
+            </div>
+          </div>
+        </div>
+      </div>`
+    
+    container.innerHTML = html;
+    config.rankingPage.append(container);
+
+    container.querySelector("#back").addEventListener("click", () => {
+      config.rankingPage.innerHTML = "";
+      config.initialPage.classList.remove("d-none");
+    });
+  }
 };
 
 // 入力→操作
@@ -279,7 +325,7 @@ class Controller {
     newGameBtn.addEventListener("click", () => {
       const userName = config.initialPage.querySelector("input").value;
       if (userName == "") alert("新しい名前を入力してください。");
-      else if (localStorage.getItem(userName) != null) alert("ユーザーがすでに存在しています。ログインしてください。");
+      else if (Controller.getUserData(userName) != null) alert("ユーザーがすでに存在しています。ログインしてください。");
       else {
         // Userオブジェクトを生成してMainへ遷移
         const user = Controller.createInitialUserAccount(userName);
@@ -290,11 +336,15 @@ class Controller {
     loginBtn.addEventListener("click", () => {
       const userName = config.initialPage.querySelector("input").value;
       if (userName == "") alert("名前を入力してください。");
-      else if (localStorage.getItem(userName) == null) alert("ユーザーが存在しません。別の名前を入力してください。");
+      else if (Controller.getUserData(userName) == null) alert("ユーザーが存在しません。別の名前を入力してください。");
       else {
         const user = Controller.callUserAccount(userName);
         Controller.moveInitialToMain(user);
       };
+    });
+    const rankingList = document.getElementById("rankingList");
+    rankingList.addEventListener("click", () => {
+      Controller.moveToRankingPage();
     });
 
   }
@@ -304,11 +354,19 @@ class Controller {
     View.createMainPage(user);
     Controller.startTimer(user);
   };
-
+  // ランキングを表示
+  static moveToRankingPage() {
+    config.initialPage.classList.add("d-none");
+    const allUser = Controller.getAllUserData();
+    const sortedAllUser = Controller.sortUser(allUser);
+    View.createRankingPage(sortedAllUser);
+  }
+  // 最初の画面に戻る
   static initializePage() {
     config.initialPage.classList.remove("d-none");
     config.initialPage.innerHTML = "";
     config.mainPage.innerHTML = "";
+    config.rankingPage.innerHTML = "";
     Controller.startGame();
   }
 
@@ -380,18 +438,41 @@ class Controller {
   }
 
   static callUserAccount(userName) {
-    const str = localStorage.getItem(userName);
+    const str = Controller.getUserData(userName);
     return JSON.parse(str);
   }
 
 
-  // ローカルストレージに保存
+  // ローカルストレージ関連
   static saveUserDate(user) {
-    localStorage.setItem(user.name, JSON.stringify(user));
+    localStorage.setItem("CMGname-" + user.name, JSON.stringify(user));
     alert("データを保存しました。終了します。");
   }
 
   static getUserData(userName) {
+    return localStorage.getItem("CMGname-" + userName);
+  }
+
+  static getAllUserData() {
+    const allUserKey = [];
+    const allKeyArr = Object.keys(localStorage);
+    for (let i = 0; i < allKeyArr.length; i++) {
+      if (allKeyArr[i].slice(0, 8) == "CMGname-") allUserKey.push(allKeyArr[i]);
+    }
+    const allUser = [];
+    for (let j = 0; j < allUserKey.length; j++) {
+      let str = localStorage.getItem(allUserKey[j]);
+      allUser.push(JSON.parse(str));
+    }
+    return allUser;
+  }
+
+  static sortUser(allUser) {
+    const sortedAllUser = [...allUser];
+    sortedAllUser.sort(function (a, b) { return b.money > a.money ? 1 : -1 });
+    console.log(allUser)
+    console.log(sortedAllUser)
+    return sortedAllUser
   }
 
 };
