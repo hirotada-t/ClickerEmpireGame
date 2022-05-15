@@ -192,7 +192,7 @@ class View {
       container.innerHTML += `
         <div class="text-white d-sm-flex align-items-center m-1 selectItem">
           <div class="d-none d-sm-block p-1 col-sm-3">
-            <img src="${user.items[i].url}" class="img-fluid">
+            <img src=".${user.items[i].url}" class="img-fluid">
           </div>
           <div class="col-sm-9">
             <div class="d-flex justify-content-between">
@@ -232,7 +232,7 @@ class View {
           <p>Get ￥${increaseRate}</p>
         </div>
         <div class="p-2 d-sm-block col-sm-5">
-          <img src="${item.url}" class="img-fluid">
+          <img src=".${item.url}" class="img-fluid">
         </div>
       </div>
       <p>How many would you like to buy?</p>
@@ -387,17 +387,17 @@ class Controller {
 
   static createInitialUserAccount(userName) {
     let itemsList = [
-      new Items("Flip machine", "ability", 0, 500, 25, 0, 15000, "./img/grill-4308709_960_720.png"),
-      new Items("ETF Stock", "investment", 0, -1, 0, 0.001, 300000, "./img/chart-1296049_960_720.png"),
-      new Items("ETF Bonds", "investment", 0, -1, 0, 0.0007, 300000, "./img/chart-1296049_960_720.png"),
-      new Items("Lemonade Stand", "realState", 0, 1000, 30, 0, 30000, "./img/juice-35236_960_720.png"),
-      new Items("Ice Cream Truck", "realState", 0, 500, 120, 0, 100000, "./img/ice-cream-4805333_960_720.png"),
-      new Items("House", "realState", 0, 100, 32000, 0, 20000000, "./img/home-1294564_960_720.png"),
-      new Items("TownHouse", "realState", 0, 100, 64000, 0, 40000000, "./img/modern-house-4276598_960_720.png"),
-      new Items("Mansion", "realState", 0, 20, 500000, 0, 250000000, "./img/condominium-2903520_960_720.png"),
-      new Items("Industrial Space", "realState", 0, 10, 2200000, 0, 1000000000, "./img/factory-48781_960_720.png"),
-      new Items("Hotel Skyscraper", "realState", 0, 5, 25000000, 0, 10000000000, "./img/skyscrapers-48853_960_720.png"),
-      new Items("Bullet-Speed Sky Railway", "realState", 0, 1, 30000000000, 0, 10000000000000, "./img/train-157027_960_720.png")
+      new Items("Flip machine", "ability", 0, 500, 25, 0, 15000, "/img/grill-4308709_960_720.png"),
+      new Items("ETF Stock", "investment", 0, -1, 0, 0.001, 300000, "/img/chart-1296049_960_720.png"),
+      new Items("ETF Bonds", "investment", 0, -1, 0, 0.0007, 300000, "/img/chart-1296049_960_720.png"),
+      new Items("Lemonade Stand", "realState", 0, 1000, 30, 0, 30000, "/img/juice-35236_960_720.png"),
+      new Items("Ice Cream Truck", "realState", 0, 500, 120, 0, 100000, "/img/ice-cream-4805333_960_720.png"),
+      new Items("House", "realState", 0, 100, 32000, 0, 20000000, "/img/home-1294564_960_720.png"),
+      new Items("TownHouse", "realState", 0, 100, 64000, 0, 40000000, "/img/modern-house-4276598_960_720.png"),
+      new Items("Mansion", "realState", 0, 20, 500000, 0, 250000000, "/img/condominium-2903520_960_720.png"),
+      new Items("Industrial Space", "realState", 0, 10, 2200000, 0, 1000000000, "/img/factory-48781_960_720.png"),
+      new Items("Hotel Skyscraper", "realState", 0, 5, 25000000, 0, 10000000000, "/img/skyscrapers-48853_960_720.png"),
+      new Items("Bullet-Speed Sky Railway", "realState", 0, 1, 30000000000, 0, 10000000000000, "/img/train-157027_960_720.png")
     ]
     return new User(userName, 20, 0, 50000, itemsList);
   }
